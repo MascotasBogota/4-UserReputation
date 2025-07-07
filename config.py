@@ -1,7 +1,7 @@
 
 # URLs for external services
-USER_SERVICE_URL = "http://localhost:5001"  # Example URL
-REPORT_SERVICE_URL = "http://localhost:5002" # Example URL
+USER_SERVICE_URL = "http://localhost:5000"  # Example URL
+REPORT_SERVICE_URL = "http://localhost:5050" # Example URL
 
 # Reputation values
 SIGHTING_USEFUL = 1

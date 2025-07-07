@@ -3,9 +3,9 @@ from src.clients import user_service_client, report_service_client
 from config import SIGHTING_USEFUL, FINDING_USEFUL, FINDING_FALSE
 
 class ReputationService:
-    def rate_response(self, response_id: str, rating: str, user_id: str):
+    def rate_response(self,report_id:str,response_id: str, rating: str, user_id: str):
         # 1. Get response details to validate owner
-        response_details = report_service_client.get_response_details(response_id)
+        response_details = report_service_client.get_response_details(report_id,response_id)
         if not response_details:
             raise ConnectionError("Could not connect to Report Service.")
 

@@ -63,6 +63,7 @@ def get_user_id_from_token():
 })
 def rate_response():
     data = request.get_json()
+    report_id = data.get("report_id")  
     response_id = data.get("response_id")
     rating = data.get("rating")
     
@@ -74,7 +75,7 @@ def rate_response():
         return jsonify({"error": "response_id and rating are required"}), 400
 
     try:
-        result = reputation_service.rate_response(response_id, rating, user_id)
+        result = reputation_service.rate_response(report_id,response_id, rating, user_id)
         return jsonify(result), 200
     except PermissionError as e:
         return jsonify({"error": str(e)}), 403
