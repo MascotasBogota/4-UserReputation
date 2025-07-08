@@ -2,20 +2,16 @@
 from flask import Blueprint, request, jsonify
 from flasgger import swag_from
 from src.services.reputation_service import ReputationService
+from src.utils.auth import get_current_user_id
 
 reputation_blueprint = Blueprint('reputation_api', __name__)
 reputation_service = ReputationService()
 
 # A mock function to get user_id from a token
 # In a real app, this would be handled by an authentication middleware
-def get_user_id_from_token():
-    auth_header = request.headers.get('Authorization')
-    if not auth_header or not auth_header.startswith('Bearer '):
-        return None
-    # This is a mock user_id. Replace with actual token decoding.
-    return "mock-user-id-from-token" 
 
-@reputation_blueprint.route("/v1/rate-response", methods=['POST'])
+
+@reputation_blueprint.route("/rate-response", methods=['POST'])
 @swag_from({
     'tags': ['Reputation'],
     'summary': 'Rate a response to a report',
@@ -28,8 +24,13 @@ def get_user_id_from_token():
             'required': True,
             'schema': {
                 'id': 'Rating',
-                'required': ['response_id', 'rating'],
+                'required': ['report_id','response_id', 'rating'],
                 'properties': {
+                    'report_id': {
+                        'type': 'string',
+                        'description': 'The unique identifier of the report',
+                        'example': 'uuid-de-la-respuesta'
+                    },
                     'response_id': {
                         'type': 'string',
                         'description': 'The unique identifier of the response being rated.',
@@ -66,8 +67,10 @@ def rate_response():
     report_id = data.get("report_id")  
     response_id = data.get("response_id")
     rating = data.get("rating")
+    token = request.headers.get("Authorization")
+    print(f"🆔 Token: {token}")
     
-    user_id = get_user_id_from_token()
+    user_id = get_current_user_id()
     if not user_id:
         return jsonify({"error": "Authentication required"}), 401
 
@@ -75,7 +78,7 @@ def rate_response():
         return jsonify({"error": "response_id and rating are required"}), 400
 
     try:
-        result = reputation_service.rate_response(report_id,response_id, rating, user_id)
+        result = reputation_service.rate_response(report_id,response_id, rating, user_id,token)
         return jsonify(result), 200
     except PermissionError as e:
         return jsonify({"error": str(e)}), 403
@@ -84,4 +87,5 @@ def rate_response():
     except ConnectionError as e:
         return jsonify({"error": str(e)}), 503 # Service Unavailable
     except Exception as e:
+        print(f"❌ An unexpected error occurred: {e}")
         return jsonify({"error": f"An unexpected error occurred: {e}"}), 500

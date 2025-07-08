@@ -13,6 +13,6 @@ api = Api(
    #Inicialización de la API de PatitasBog    
     title="PatitasBog - Reputación de Usuarios",
     version="1.0",
-    description="Servicio de reportes y respuestas",
+    description="Servicio de reputación de usuarios para la aplicación PatitasBog",
     authorizations=authorizations,
 )
