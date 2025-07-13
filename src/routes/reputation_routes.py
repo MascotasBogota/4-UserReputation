@@ -11,7 +11,7 @@ reputation_service = ReputationService()
 # In a real app, this would be handled by an authentication middleware
 
 
-@reputation_blueprint.route("/rate-response", methods=['POST'])
+@reputation_blueprint.route("/rate-response/<string:report_id>/<string:response_id>", methods=['POST'])
 @swag_from({
     'tags': ['Reputation'],
     'summary': 'Rate a response to a report',
@@ -19,27 +19,33 @@ reputation_service = ReputationService()
     'security': [{'Bearer': []}],
     'parameters': [
         {
+            'name': 'report_id',
+            'in': 'path',
+            'type': 'string',
+            'required': True,
+            'description': 'The unique identifier of the report',
+            'example': 'uuid-del-reporte'
+        },
+        {
+            'name': 'response_id',
+            'in': 'path',
+            'type': 'string',
+            'required': True,
+            'description': 'The unique identifier of the response being rated',
+            'example': 'uuid-de-la-respuesta'
+        },
+        {
             'name': 'body',
             'in': 'body',
             'required': True,
             'schema': {
                 'id': 'Rating',
-                'required': ['report_id','response_id', 'rating'],
+                'required': ['rating'],
                 'properties': {
-                    'report_id': {
-                        'type': 'string',
-                        'description': 'The unique identifier of the report',
-                        'example': 'uuid-de-la-respuesta'
-                    },
-                    'response_id': {
-                        'type': 'string',
-                        'description': 'The unique identifier of the response being rated.',
-                        'example': 'uuid-de-la-respuesta'
-                    },
                     'rating': {
                         'type': 'string',
-                        'description': 'The rating to apply.',
-                        'enum': ['useful', 'false_finding'],
+                        'description': 'The rating to apply. For "avistamiento": useful (marks as useful), not_useful (removes useful mark, only if previously marked as useful). For "hallazgo": useful (marks as useful), false_finding (marks as false finding).',
+                        'enum': ['useful', 'not_useful', 'false_finding'],
                         'example': 'useful'
                     }
                 }
@@ -62,10 +68,8 @@ reputation_service = ReputationService()
         503: {'description': 'Service unavailable, could not connect to dependent services.'}
     }
 })
-def rate_response():
+def rate_response(report_id, response_id):
     data = request.get_json()
-    report_id = data.get("report_id")  
-    response_id = data.get("response_id")
     rating = data.get("rating")
     token = request.headers.get("Authorization")
     print(f"🆔 Token: {token}")
@@ -74,8 +78,8 @@ def rate_response():
     if not user_id:
         return jsonify({"error": "Authentication required"}), 401
 
-    if not response_id or not rating:
-        return jsonify({"error": "response_id and rating are required"}), 400
+    if not rating:
+        return jsonify({"error": "rating is required"}), 400
 
     try:
         result = reputation_service.rate_response(report_id,response_id, rating, user_id,token)

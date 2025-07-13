@@ -12,6 +12,7 @@ def update_user_reputation(user_id: str, delta: int,token:str):
                  "Authorization":token})
         response.raise_for_status()  # Raise an exception for bad status codes
         print(f"✅ Reputation updated successfully for user_id: {user_id}")
+        print(f"Response: {response.json()}")
         return response.json()
     except Exception as e:
         # Handle connection errors, timeouts, etc.
