@@ -1,8 +1,11 @@
-from flask import Flask
+from flask import Flask, request
 from flasgger import Swagger
 from src.routes.reputation_routes import reputation_blueprint
 import os
 from dotenv import load_dotenv
+from prometheus_client import Counter, Histogram, generate_latest
+import time
+from src.utils.telemetry import init_telemetry
 
 app = Flask(__name__)
 app.config["JWT_SECRET"] = os.getenv("JWT_SECRET") 
@@ -30,6 +33,9 @@ swagger_config = {
 }
 #Swagger(app)
 Swagger(app, config=swagger_config)
+
+# Inicializar telemetría
+init_telemetry(app)
 
 # Register the blueprint for reputation routes
 app.register_blueprint(reputation_blueprint, url_prefix='/api')
