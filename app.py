@@ -1,4 +1,5 @@
 from flask import Flask, request
+from flask_cors import CORS
 from flasgger import Swagger
 from src.routes.reputation_routes import reputation_blueprint
 import os
@@ -9,6 +10,7 @@ from src.utils.telemetry import init_telemetry
 
 app = Flask(__name__)
 app.config["JWT_SECRET"] = os.getenv("JWT_SECRET") 
+CORS(app)
 swagger_config = {
     "headers": [],
     "specs": [
